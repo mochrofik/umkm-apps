@@ -5,6 +5,8 @@ import 'package:umkm_store/bloc/register/register_event.dart';
 import 'package:umkm_store/bloc/register/register_state.dart';
 
 class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
+
   @override
   _RegisterScreenState createState() => _RegisterScreenState();
 }
@@ -147,8 +149,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           obscure: true,
                           validator: (v) {
                             if (v!.isEmpty) return "Password wajib diisi";
-                            if (v.length < 8)
+                            if (v.length < 8) {
                               return "Password minimal 8 karakter";
+                            }
                             return null;
                           },
                         ),

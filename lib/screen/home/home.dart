@@ -136,7 +136,7 @@ class HomePage extends StatelessWidget {
 
   // --- WIDGET HELPER: STATS CARD ---
   Widget _buildUserProfileCard(UserData user) {
-    print("user " + user.name);
+    print("user ${user.name}");
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       sliver: SliverToBoxAdapter(

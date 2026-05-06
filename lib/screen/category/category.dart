@@ -197,12 +197,12 @@ class MasterKategoriPage extends StatelessWidget {
                         IconButton(
                           icon: const Icon(Icons.edit,
                               color: GlobalColor.warningColor),
-                          onPressed: () => null,
+                          onPressed: () {},
                         ),
                         IconButton(
                           icon: const Icon(Icons.delete,
                               color: GlobalColor.dangerColor),
-                          onPressed: () => null,
+                          onPressed: () {},
                         ),
                       ],
                     ),

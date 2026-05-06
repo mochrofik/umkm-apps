@@ -14,6 +14,7 @@ class UserData {
   final String email;
   final DateTime? emailVerifiedAt;
   final String role;
+  final List<String> roles;
   final String status;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -24,6 +25,7 @@ class UserData {
     required this.email,
     this.emailVerifiedAt,
     required this.role,
+    required this.roles,
     required this.status,
     required this.createdAt,
     required this.updatedAt,
@@ -37,6 +39,9 @@ class UserData {
             ? null
             : DateTime.parse(json["email_verified_at"]),
         role: json["role"],
+        roles: json["roles"] == null
+            ? []
+            : List<String>.from(json["roles"]!.map((x) => x)),
         status: json["status"],
         createdAt: DateTime.parse(json["created_at"]),
         updatedAt: DateTime.parse(json["updated_at"]),

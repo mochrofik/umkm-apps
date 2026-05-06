@@ -6,4 +6,6 @@ class LoginSubmitted extends LoginEvent {
   LoginSubmitted(this.identifier, this.password);
 }
 
-class LogoutRequested extends LoginEvent {} 
+class LogoutRequested extends LoginEvent {}
+
+class GoogleLoginRequested extends LoginEvent {}

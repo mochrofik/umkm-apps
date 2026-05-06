@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:umkm_store/utils/GlobalColor.dart';
+import 'package:umkm_store/widgets/button/ButtonLoading.dart';
 
 class PrimaryButton extends StatelessWidget {
   final VoidCallback? onPressed;
@@ -21,12 +22,7 @@ class PrimaryButton extends StatelessWidget {
         elevation: 0,
       ),
       child: isLoading
-          ? const SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(
-                  color: Colors.white, strokeWidth: 2),
-            )
+          ? const ButtonLoading()
           : Text(
               text,
               style: TextStyle(

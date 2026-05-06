@@ -30,7 +30,7 @@ class CategoryRepository {
 
       return response;
     } on DioException catch (e) {
-      print("e " + e.toString());
+      print("e $e");
       String errorMessage = "Terjadi kesalahan yang tidak diketahui";
 
       if (e.response != null) {

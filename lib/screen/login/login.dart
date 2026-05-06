@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,6 +7,8 @@ import 'package:umkm_store/bloc/login/login_state.dart';
 import 'package:umkm_store/services/AuthRepository.dart';
 import 'package:umkm_store/utils/GlobalColor.dart';
 import 'package:umkm_store/widgets/button/PrimaryButton.dart';
+import 'package:umkm_store/widgets/button/GoogleButton.dart';
+import 'package:umkm_store/widgets/links/LinksCustom.dart';
 
 import '../register/register.dart';
 
@@ -149,7 +150,6 @@ class _LoginPageState extends State<LoginPage> {
                               onPressed: state is LoginLoading
                                   ? null
                                   : () {
-                                      log("Klik masuk");
                                       context.read<LoginBloc>().add(
                                             LoginSubmitted(
                                                 _emailController.text,
@@ -161,8 +161,40 @@ class _LoginPageState extends State<LoginPage> {
                     },
                   ),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 30),
 
+                  // --- DIVIDER ---
+                  Row(
+                    children: [
+                      Expanded(
+                          child: Divider(
+                              color: GlobalColor.greyHint.withOpacity(0.5))),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text("Atau",
+                            style: TextStyle(color: GlobalColor.greyHint)),
+                      ),
+                      Expanded(
+                          child: Divider(
+                              color: GlobalColor.greyHint.withOpacity(0.5))),
+                    ],
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  // --- GOOGLE LOGIN ---
+                  BlocBuilder<LoginBloc, LoginState>(
+                    builder: (context, state) {
+                      return GoogleButton(
+                        onPressed: () {
+                          context.read<LoginBloc>().add(GoogleLoginRequested());
+                        },
+                        isLoading: state is LoginLoading,
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 40),
                   // // --- LINK DAFTAR ---
                   const Center(
                     child: Text("Belum punya akun?",
@@ -190,16 +222,9 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _buildRegisterLink(String label, VoidCallback onTap) {
-    return InkWell(
+    return LinkCustoms(
+      label: label,
       onTap: onTap,
-      child: Text(
-        label,
-        style: const TextStyle(
-          color: GlobalColor.primaryColor,
-          fontWeight: FontWeight.bold,
-          decoration: TextDecoration.underline,
-        ),
-      ),
     );
   }
 }

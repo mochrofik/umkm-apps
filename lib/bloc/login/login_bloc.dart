@@ -38,6 +38,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
                 email: user['email'],
                 role: user['role'],
                 status: user['status'],
+                roles: [],
                 createdAt: DateTime.parse(user['created_at']),
                 updatedAt: DateTime.parse(user['updated_at']),
               ),
@@ -52,6 +53,13 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         storageService.clearToken();
         emit(LoginFailure(e.toString()));
       }
+    });
+
+    on<GoogleLoginRequested>((event, emit) async {
+      emit(LoginLoading());
+      // Simulasi delay atau implementasi masa depan
+      await Future.delayed(const Duration(seconds: 1));
+      emit(LoginFailure("Fitur Login Google sedang dalam pengembangan."));
     });
 
     on<LogoutRequested>((event, emit) async {
