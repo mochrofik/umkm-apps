@@ -7,12 +7,10 @@ class CurrentLocationService {
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      await Geolocator.openLocationSettings();
       return Future.error(
-          'Layanan lokasi (GPS) dimatikan. Silakan aktifkan GPS Anda.');
+          'Layanan lokasi (GPS) dimatikan. Silakan aktifkan GPS Anda Untuk Melihat Toko Terdekat.');
     }
 
-    // 2. Cek izin akses
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
@@ -22,11 +20,11 @@ class CurrentLocationService {
     }
 
     if (permission == LocationPermission.deniedForever) {
+      await Geolocator.openAppSettings();
       return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
+          'Lokasi ditolak secara permanen, kami tidak dapat meminta izin. Silahkan aktifkan lokasi Anda di pengaturan perangkat.');
     }
 
-    // 3. Ambil lokasi
     return await Geolocator.getCurrentPosition();
   }
 }

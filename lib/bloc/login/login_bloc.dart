@@ -63,6 +63,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       try {
         await storageService.clearToken();
         await storageService.deleteUser();
+        await authService.signOutWithGoogle();
         await Future.delayed(const Duration(seconds: 2));
         emit(LoginInitial());
       } catch (e) {

@@ -14,7 +14,6 @@ import 'package:umkm_store/bloc/customer/customer_state.dart';
 import 'package:umkm_store/repository/CategoryRepository.dart';
 import 'package:umkm_store/screen/profile/ProfileScreen.dart';
 import 'package:umkm_store/screen/promo/PromoScreen.dart';
-import 'package:umkm_store/services/CustomerService.dart';
 import 'package:umkm_store/utils/GlobalColor.dart';
 import 'package:umkm_store/utils/snackbar_extension.dart';
 import 'package:umkm_store/widgets/CategoryGridView.dart';

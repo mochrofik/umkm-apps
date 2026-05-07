@@ -12,6 +12,7 @@ import 'package:umkm_store/model/CategoryModel.dart';
 import 'package:umkm_store/model/StoreNearby.dart';
 import 'package:umkm_store/services/CustomerService.dart';
 import 'package:umkm_store/utils/GlobalColor.dart';
+import 'package:umkm_store/widgets/AppBarImage.dart';
 import 'package:umkm_store/widgets/card/StoreCard.dart';
 
 class StoreByCategory extends StatelessWidget {
@@ -63,77 +64,11 @@ class StoreByCategory extends StatelessWidget {
   }
 
   Widget _buildAppBar(BuildContext context, CategoryModel category) {
-    return SliverAppBar(
-      expandedHeight: 240,
-      pinned: true,
-      backgroundColor: GlobalColor.primaryColor,
-      leading: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: CircleAvatar(
-          backgroundColor: Colors.white.withOpacity(0.2),
-          child: IconButton(
-            icon: const Icon(Icons.chevron_left, color: Colors.white),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ),
-      ),
-      flexibleSpace: FlexibleSpaceBar(
-        background: Stack(
-          fit: StackFit.expand,
-          children: [
-            Image.network(
-              "https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1000&auto=format&fit=crop",
-              fit: BoxFit.cover,
-            ),
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black.withOpacity(0.8),
-                  ],
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 20,
-              left: 20,
-              right: 20,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Beranda / ${category.name}",
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
-                      fontSize: 12,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    category.name,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "Temukan UMKM terbaik untuk kategori ini",
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+    return AppBarImage(
+      expandedHeight: 150,
+      onBackPress: () => Navigator.pop(context),
+      title: category.name,
+      subtitle: "Temukan UMKM terbaik untuk kategori ini",
     );
   }
 

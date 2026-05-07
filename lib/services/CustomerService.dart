@@ -41,4 +41,19 @@ class CustomerService {
       throw Exception(e);
     }
   }
+
+  Future<StoreNearby> getStoreBySlug(String slug) async {
+    try {
+      final response = await _customerRepository.getStoreBySlug(slug);
+
+      if (response.statusCode == 200) {
+        _logger.d(response.data['data']);
+        return StoreNearby.fromJson(response.data['data']);
+      }
+      throw Exception("Toko tidak ditemukan");
+    } catch (e) {
+      _logger.e("Error CustomerService getStoreBySlug: $e");
+      throw Exception(e);
+    }
+  }
 }

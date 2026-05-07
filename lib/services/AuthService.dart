@@ -76,7 +76,7 @@ class AuthService {
     try {
       await _googleSignIn.signOut();
     } catch (e) {
-      throw e;
+      throw Exception(e);
     }
   }
 
