@@ -2,7 +2,6 @@ import 'package:custom_refresh_indicator/custom_refresh_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:logger/logger.dart';
 import 'package:umkm_store/bloc/category/category_bloc.dart';
 import 'package:umkm_store/bloc/category/category_event.dart';
 import 'package:umkm_store/bloc/category/category_state.dart';
@@ -15,9 +14,9 @@ import 'package:umkm_store/bloc/customer/customer_state.dart';
 import 'package:umkm_store/repository/CategoryRepository.dart';
 import 'package:umkm_store/screen/profile/ProfileScreen.dart';
 import 'package:umkm_store/screen/promo/PromoScreen.dart';
-import 'package:umkm_store/services/CurrentLocationService.dart';
 import 'package:umkm_store/services/CustomerService.dart';
 import 'package:umkm_store/utils/GlobalColor.dart';
+import 'package:umkm_store/utils/snackbar_extension.dart';
 import 'package:umkm_store/widgets/CategoryGridView.dart';
 import 'package:umkm_store/widgets/NearbyStoresList.dart';
 import 'package:umkm_store/widgets/SearchAppBar.dart';
@@ -48,18 +47,10 @@ class _MainScreenState extends State<MainScreen> {
     return MultiBlocProvider(
         providers: [
           BlocProvider(
-            create: (context) => CurrentLocationBloc(
-                context.read<CurrentLocationService>(), context.read<Logger>())
-              ..add(FetchCurrentLocation()),
-          ),
-          BlocProvider(
-            create: (context) => CustomerBloc(context.read<CustomerService>()),
-          ),
-          BlocProvider(
             create: (context) => CategoryBloc(
               categoryRepository: context.read<CategoryRepository>(),
             )..add(FetchCategoryUser()),
-          )
+          ),
         ],
         child: MultiBlocListener(
           listeners: [
@@ -171,6 +162,10 @@ class HomeBody extends StatelessWidget {
           customerBloc.add(FetchNearbyStores(
               latitude: locationState.position.latitude,
               longitude: locationState.position.longitude));
+        }
+
+        if (locationState is CurrentLocationFailure) {
+          context.showErrorSnackBar(locationState.error);
         }
 
         await Future.wait([

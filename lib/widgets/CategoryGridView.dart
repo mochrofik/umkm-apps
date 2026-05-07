@@ -54,7 +54,7 @@ class CategoryGridView extends StatelessWidget {
               itemBuilder: (context, index) {
                 final item =
                     isLoading ? null : (state as CategoryLoaded).items[index];
-                return _buildCategoryItem(item);
+                return _buildCategoryItem(item, context: context);
               },
             ),
           );
@@ -65,12 +65,17 @@ class CategoryGridView extends StatelessWidget {
     );
   }
 
-  Widget _buildCategoryItem(CategoryModel? item) {
+  Widget _buildCategoryItem(CategoryModel? item,
+      {required BuildContext context}) {
     return InkWell(
       onTap: item == null
           ? null
           : () {
-              // TODO: Navigate to category products
+              Navigator.pushNamed(
+                context,
+                '/store-by-category',
+                arguments: item,
+              );
             },
       child: Column(
         children: [

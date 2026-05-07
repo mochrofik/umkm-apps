@@ -22,7 +22,6 @@ class CurrentLocationBloc
     emit(CurrentLocationLoading());
     try {
       final position = await _currentLocationService.getCurrentLocation();
-      _logger.d("current location bloc $position");
       emit(CurrentLocationSuccess(position!));
     } catch (e) {
       _logger.e("current location bloc $e");

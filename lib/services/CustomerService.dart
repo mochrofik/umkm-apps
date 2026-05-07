@@ -24,4 +24,21 @@ class CustomerService {
       throw Exception(e);
     }
   }
+
+  Future<List<StoreNearby>> getStoreByCategory(
+      {required String category, String? lat, String? lng}) async {
+    try {
+      final response = await _customerRepository.getStoreByCategory(
+          category: category, lat: lat, lng: lng);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data['data'];
+        return data.map((json) => StoreNearby.fromJson(json)).toList();
+      }
+      return [];
+    } catch (e) {
+      _logger.e("Error CustomerService getStoreByCategory: $e");
+      throw Exception(e);
+    }
+  }
 }

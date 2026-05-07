@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:logger/logger.dart';
+import 'package:umkm_store/bloc/current_location/current_location_bloc.dart';
+import 'package:umkm_store/bloc/current_location/current_location_event.dart';
+import 'package:umkm_store/bloc/customer/customer_bloc.dart';
 import 'package:umkm_store/bloc/login/login_bloc.dart';
 import 'package:umkm_store/bloc/register/register_bloc.dart';
 import 'package:umkm_store/bloc/splash_bloc.dart';
@@ -14,6 +17,7 @@ import 'package:umkm_store/screen/login/login.dart';
 import 'package:umkm_store/screen/main/MainScreen.dart';
 import 'package:umkm_store/screen/register/register.dart';
 import 'package:umkm_store/screen/splashscreen/splashscreen.dart';
+import 'package:umkm_store/screen/store/StoreByCategory.dart';
 import 'package:umkm_store/screen/store/StoreDetailScreen.dart';
 import 'package:umkm_store/services/AuthRepository.dart';
 import 'package:umkm_store/services/AuthService.dart';
@@ -80,6 +84,14 @@ class MyApp extends StatelessWidget {
           BlocProvider(
               create: (context) =>
                   RegisterBloc(context.read<RegisterService>())),
+          BlocProvider(
+            create: (context) => CurrentLocationBloc(
+                context.read<CurrentLocationService>(), context.read<Logger>())
+              ..add(FetchCurrentLocation()),
+          ),
+          BlocProvider(
+            create: (context) => CustomerBloc(context.read<CustomerService>()),
+          ),
         ],
         child: MaterialApp(
           theme: ThemeData(
@@ -104,6 +116,7 @@ class MyApp extends StatelessWidget {
             '/home': (context) => const HomePage(),
             '/master-kategori': (context) => const MasterKategoriPage(),
             '/store-detail': (context) => const StoreDetailScreen(),
+            '/store-by-category': (context) => const StoreByCategory(),
           },
         ),
       ),

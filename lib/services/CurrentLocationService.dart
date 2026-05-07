@@ -5,11 +5,11 @@ class CurrentLocationService {
     bool serviceEnabled;
     LocationPermission permission;
 
-    // 1. Cek apakah layanan lokasi aktif
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      // Tampilkan dialog untuk mengaktifkan lokasi
-      return Future.error('Location services are disabled.');
+      await Geolocator.openLocationSettings();
+      return Future.error(
+          'Layanan lokasi (GPS) dimatikan. Silakan aktifkan GPS Anda.');
     }
 
     // 2. Cek izin akses

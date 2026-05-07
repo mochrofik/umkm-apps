@@ -27,4 +27,26 @@ class CustomerRepository {
       throw ApiExceptionHandler.handleException(e);
     }
   }
+
+  Future<Response> getStoreByCategory(
+      {required String category, String? lat, String? lng}) async {
+    try {
+      final String? token = await storageService.getToken();
+
+      Response response = await _dio.get(
+        "${Constans.apiUrl}get-store-by-category",
+        queryParameters: {
+          "category": category,
+          if (lat != null) "lat": lat,
+          if (lng != null) "lng": lng,
+        },
+        options: Options(
+          headers: {"Authorization": "Bearer $token"},
+        ),
+      );
+      return response;
+    } on DioException catch (e) {
+      throw ApiExceptionHandler.handleException(e);
+    }
+  }
 }
