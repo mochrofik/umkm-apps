@@ -32,7 +32,6 @@ class UserData {
   });
 
   factory UserData.fromJson(Map<String, dynamic> json) {
-    print("json model ${json['roles']}");
     return UserData(
       id: json["id"],
       name: json["name"],

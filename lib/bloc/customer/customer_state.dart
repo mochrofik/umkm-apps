@@ -15,3 +15,8 @@ class CustomerFailure extends CustomerState {
   final String error;
   CustomerFailure(this.error);
 }
+
+class NavigateToStoreDetail extends CustomerState {
+  final StoreNearby store;
+  NavigateToStoreDetail(this.store);
+}

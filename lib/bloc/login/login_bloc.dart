@@ -34,7 +34,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           emit(LoginFailure("Error login user data tidak ditemukan"));
         }
       } catch (e) {
-        storageService.clearToken();
         emit(LoginFailure(e.toString()));
       }
     });
@@ -63,7 +62,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       emit(LoginLoading());
       try {
         await storageService.clearToken();
-
+        await storageService.deleteUser();
+        await Future.delayed(const Duration(seconds: 2));
         emit(LoginInitial());
       } catch (e) {
         emit(LoginFailure("Gagal Logout: $e"));

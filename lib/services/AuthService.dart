@@ -28,11 +28,16 @@ class AuthService {
         final UserData userData =
             UserData.fromJson(response.data['data']['user']);
 
-        await storageService.saveToken(response.data['data']['access_token']);
+        if (userData.roles.isNotEmpty && userData.roles.contains('customer') ||
+            userData.roles.contains('admin')) {
+          await storageService.saveToken(response.data['data']['access_token']);
 
-        await storageService.saveUser(userData);
+          await storageService.saveUser(userData);
 
-        return userData;
+          return userData;
+        } else {
+          return null;
+        }
       } else {
         return null;
       }

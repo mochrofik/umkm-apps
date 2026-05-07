@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:logger/logger.dart';
-import 'package:umkm_store/bloc/current_location/current_location_bloc.dart';
-import 'package:umkm_store/bloc/current_location/current_location_event.dart';
 import 'package:umkm_store/bloc/login/login_bloc.dart';
 import 'package:umkm_store/bloc/register/register_bloc.dart';
 import 'package:umkm_store/bloc/splash_bloc.dart';
@@ -16,6 +14,7 @@ import 'package:umkm_store/screen/login/login.dart';
 import 'package:umkm_store/screen/main/MainScreen.dart';
 import 'package:umkm_store/screen/register/register.dart';
 import 'package:umkm_store/screen/splashscreen/splashscreen.dart';
+import 'package:umkm_store/screen/store/StoreDetailScreen.dart';
 import 'package:umkm_store/services/AuthRepository.dart';
 import 'package:umkm_store/services/AuthService.dart';
 import 'package:umkm_store/services/CustomerService.dart';
@@ -26,7 +25,6 @@ import 'package:umkm_store/services/StorageService.dart';
 import 'package:umkm_store/utils/GlobalColor.dart';
 
 import 'package:umkm_store/repository/CategoryRepository.dart';
-import 'package:umkm_store/bloc/category/category_bloc.dart';
 
 late final FirebaseApp app;
 late final FirebaseAuth auth;
@@ -38,10 +36,10 @@ void main() async {
   // We store the app and auth to make testing with a named instance easier.
   app = await Firebase.initializeApp(
       options: FirebaseOptions(
-          apiKey: 'AIzaSyDJ6wn0HgWt9hM-uzLVoD_Uff9MsiA0EQE',
-          appId: '1:82735634219:android:11ad6d0964a77f5443576e',
-          messagingSenderId: '82735634219',
-          projectId: 'umkm-project-aa392'));
+          apiKey: dotenv.env['API_KEY']!,
+          appId: dotenv.env['APP_ID']!,
+          messagingSenderId: dotenv.env['MESSAGING_SENDER_ID']!,
+          projectId: dotenv.env['PROJECT_ID']!));
   auth = FirebaseAuth.instanceFor(app: app);
 
   runApp(const MyApp());
@@ -82,14 +80,6 @@ class MyApp extends StatelessWidget {
           BlocProvider(
               create: (context) =>
                   RegisterBloc(context.read<RegisterService>())),
-          BlocProvider(
-            create: (context) => CurrentLocationBloc(
-                context.read<CurrentLocationService>(), context.read<Logger>())
-              ..add(FetchCurrentLocation()),
-          ),
-          BlocProvider(
-              create: (context) => CategoryBloc(
-                  categoryRepository: context.read<CategoryRepository>()))
         ],
         child: MaterialApp(
           theme: ThemeData(
@@ -113,6 +103,7 @@ class MyApp extends StatelessWidget {
             '/login': (context) => const LoginPage(),
             '/home': (context) => const HomePage(),
             '/master-kategori': (context) => const MasterKategoriPage(),
+            '/store-detail': (context) => const StoreDetailScreen(),
           },
         ),
       ),

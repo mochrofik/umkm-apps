@@ -11,6 +11,8 @@ import 'package:umkm_store/widgets/button/GoogleButton.dart';
 import 'package:umkm_store/widgets/links/LinksCustom.dart';
 import 'package:umkm_store/widgets/input/InputCustom.dart';
 
+import 'package:umkm_store/utils/snackbar_extension.dart';
+
 import '../register/register.dart';
 
 class LoginPage extends StatefulWidget {
@@ -43,33 +45,7 @@ class _LoginPageState extends State<LoginPage> {
               storageService: context.read<StorageService>(),
             ),
         child: BlocListener<LoginBloc, LoginState>(
-          listener: (context, state) {
-            if (state is LoginSuccess) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text("Login Berhasil!"),
-                    backgroundColor: Colors.green),
-              );
-
-              Navigator.pushReplacementNamed(context, '/home');
-            } else if (state is LoginFailure) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content: Text(state.error), backgroundColor: Colors.red),
-              );
-            } else if (state is LoginGoogleSuccess) {
-              if (state.googleLoginResponse.isNewUser) {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => RegisterScreen(
-                              loginGoogle: state.googleLoginResponse,
-                            )));
-              } else {
-                Navigator.pushReplacementNamed(context, '/main-screen');
-              }
-            }
-          },
+          listener: _onLoginStateChanged,
           child: Scaffold(
             backgroundColor: Colors.white,
             body: SafeArea(
@@ -221,5 +197,47 @@ class _LoginPageState extends State<LoginPage> {
       label: label,
       onTap: onTap,
     );
+  }
+
+  // --- HANDLERS ---
+
+  void _onLoginStateChanged(BuildContext context, LoginState state) {
+    if (state is LoginSuccess) {
+      _handleLoginSuccess(context, state);
+    } else if (state is LoginFailure) {
+      context.showErrorSnackBar(state.error);
+    } else if (state is LoginGoogleSuccess) {
+      _handleGoogleLoginSuccess(context, state);
+    }
+  }
+
+  void _handleLoginSuccess(BuildContext context, LoginSuccess state) {
+    final roles = state.userData.roles;
+
+    if (roles.contains('admin')) {
+      context.showSuccessSnackBar("Login Berhasil!");
+      Navigator.pushReplacementNamed(context, '/home');
+    } else if (roles.contains('customer')) {
+      context.showSuccessSnackBar("Login Berhasil!");
+      Navigator.pushReplacementNamed(context, '/main-screen');
+    } else {
+      context.showErrorSnackBar("Login Gagal! Role tidak dikenali.");
+    }
+  }
+
+  void _handleGoogleLoginSuccess(BuildContext context, LoginGoogleSuccess state) {
+    if (state.googleLoginResponse.isNewUser) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => RegisterScreen(
+            loginGoogle: state.googleLoginResponse,
+          ),
+        ),
+      );
+    } else {
+      context.showSuccessSnackBar("Login Google Berhasil!");
+      Navigator.pushReplacementNamed(context, '/main-screen');
+    }
   }
 }

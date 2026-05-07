@@ -14,43 +14,60 @@ class SearchAppBar extends StatelessWidget {
         right: 20,
       ),
       decoration: BoxDecoration(
-        color: GlobalColor.primaryColor,
+        gradient: const LinearGradient(
+          colors: [
+            GlobalColor.primaryColor,
+            GlobalColor.blueLightColor,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(15),
+          bottomRight: Radius.circular(15),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+            color: GlobalColor.primaryColor.withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: Row(
         children: [
-          // Search Box
+          // Search Box with Glassmorphism feel
           Expanded(
             child: Container(
-              height: 45,
+              height: 46,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.white.withOpacity(0.3)),
+                borderRadius: BorderRadius.circular(50), // Full rounded pill
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: const TextField(
                 textAlignVertical: TextAlignVertical.center,
                 decoration: InputDecoration(
                   isCollapsed: true,
-                  hintText: "Cari di Lemelle...",
+                  hintText: "Cari produk atau UMKM...",
                   hintStyle: TextStyle(
-                    color: GlobalColor.greyHint,
+                    color: Colors.grey,
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
                   ),
                   prefixIcon: Icon(
                     Icons.search_rounded,
                     color: GlobalColor.primaryColor,
-                    size: 20,
+                    size: 24,
                   ),
                   border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 15),
                 ),
               ),
             ),
@@ -58,7 +75,7 @@ class SearchAppBar extends StatelessWidget {
           const SizedBox(width: 15),
           // Action Icons
           _buildIconButton(Icons.shopping_cart_outlined, () {}),
-          const SizedBox(width: 10),
+          const SizedBox(width: 5),
           _buildIconButton(Icons.notifications_none_rounded, () {}),
         ],
       ),
@@ -66,16 +83,19 @@ class SearchAppBar extends StatelessWidget {
   }
 
   Widget _buildIconButton(IconData icon, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Stack(
-        children: [
-          Icon(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(50),
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          child: Icon(
             icon,
             color: Colors.white,
             size: 26,
           ),
-        ],
+        ),
       ),
     );
   }

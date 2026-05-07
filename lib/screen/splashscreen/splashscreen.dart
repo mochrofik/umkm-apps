@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:umkm_store/bloc/splash_bloc.dart';
@@ -11,6 +13,7 @@ class SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocListener<SplashBloc, SplashState>(
       listener: (context, state) {
+        log(state.toString());
         if (state is SplashAuthenticated) {
           if (state.user.roles.contains('customer')) {
             Navigator.pushReplacementNamed(context, '/main-screen');
