@@ -1,17 +1,20 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:umkm_store/bloc/login/login_event.dart';
 import 'package:umkm_store/bloc/login/login_state.dart';
-import 'package:umkm_store/model/UserModel.dart';
-import 'package:umkm_store/services/AuthRepository.dart';
+import 'package:umkm_store/services/AuthService.dart';
 import 'package:umkm_store/services/StorageService.dart';
+import 'package:logger/logger.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  final AuthRepository authRepository;
+  final StorageService storageService;
+  final AuthService authService;
+  final logger = Logger();
 
-  LoginBloc({required this.authRepository}) : super(LoginInitial()) {
+  LoginBloc({
+    required this.storageService,
+    required this.authService,
+  }) : super(LoginInitial()) {
     on<LoginSubmitted>((event, emit) async {
-      StorageService storageService = StorageService();
-
       if (event.identifier.isEmpty && event.password.isEmpty) {
         return emit(LoginFailure("Email dan Password tidak boleh kosong!!!"));
       } else if (event.identifier.isEmpty) {
@@ -22,32 +25,13 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       emit(LoginLoading());
 
       try {
-        final res =
-            await authRepository.login(event.identifier, event.password);
+        final userData =
+            await authService.login(event.identifier, event.password);
 
-        // log(res.data.toString());
-        if (res.statusCode == 200) {
-          storageService.saveToken(res.data['data']['access_token']);
-          final user = res.data['data']['user'];
-
-          if (user != null) {
-            storageService.saveUser(
-              UserData(
-                id: user['id'],
-                name: user['name'],
-                email: user['email'],
-                role: user['role'],
-                status: user['status'],
-                roles: [],
-                createdAt: DateTime.parse(user['created_at']),
-                updatedAt: DateTime.parse(user['updated_at']),
-              ),
-            );
-          }
-
-          emit(LoginSuccess(res));
+        if (userData != null) {
+          emit(LoginSuccess(userData));
         } else {
-          emit(LoginFailure(res.statusMessage ?? "Error login"));
+          emit(LoginFailure("Error login user data tidak ditemukan"));
         }
       } catch (e) {
         storageService.clearToken();
@@ -56,17 +40,28 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     });
 
     on<GoogleLoginRequested>((event, emit) async {
-      emit(LoginLoading());
-      // Simulasi delay atau implementasi masa depan
-      await Future.delayed(const Duration(seconds: 1));
-      emit(LoginFailure("Fitur Login Google sedang dalam pengembangan."));
+      emit(LoginGoogleLoading());
+      try {
+        final res = await authService.signInWithGoogle();
+
+        if (res?.user?.email == null) {
+          emit(LoginFailure("Email tidak ditemukan!"));
+          return;
+        }
+
+        final checkLogin = await authService.checkLoginGoogleApp(res!.user!.uid,
+            res.user!.email!, res.user!.displayName ?? "Unknown");
+
+        emit(LoginGoogleSuccess(checkLogin!));
+      } catch (e) {
+        logger.e(" login bloc $e");
+        emit(LoginFailure(e.toString()));
+      }
     });
 
     on<LogoutRequested>((event, emit) async {
       emit(LoginLoading());
       try {
-        StorageService storageService = StorageService();
-
         await storageService.clearToken();
 
         emit(LoginInitial());

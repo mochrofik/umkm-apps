@@ -1,5 +1,3 @@
-import 'package:dio/dio.dart';
-
 abstract class RegisterState {}
 
 class RegisterInitial extends RegisterState {}
@@ -7,8 +5,8 @@ class RegisterInitial extends RegisterState {}
 class RegisterLoading extends RegisterState {}
 
 class RegisterSuccess extends RegisterState {
-  final Response response;
-  RegisterSuccess(this.response);
+  final String message;
+  RegisterSuccess(this.message);
 }
 
 class RegisterFailure extends RegisterState {

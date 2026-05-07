@@ -10,13 +10,14 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
       emit(SplashLoading());
 
       final token = await _storageService.getToken();
+      final user = await _storageService.getUser();
 
       // Simulasi delay biar splash screen tidak terlalu cepat hilang
       await Future.delayed(const Duration(seconds: 3));
 
       // Cek apakah token ada atau tidak
       if (token != null && token.isNotEmpty) {
-        emit(SplashAuthenticated());
+        emit(SplashAuthenticated(user!));
       } else {
         emit(SplashUnauthenticated());
       }

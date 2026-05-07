@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class GlobalColor {
-  static const primaryColor = Color(0xff2563eb);
+  static const primaryColor = Color(0xFF054479);
   static const blueLightColor = Color(0xff03AED2);
   static const warningColor = Color(0xffF8DE22);
   static const orangeColor = Color(0xffF45B26);

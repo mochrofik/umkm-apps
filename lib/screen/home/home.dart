@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:umkm_store/bloc/home/home_bloc.dart';
@@ -10,6 +8,7 @@ import 'package:umkm_store/bloc/login/login_event.dart';
 import 'package:umkm_store/bloc/login/login_state.dart';
 import 'package:umkm_store/model/UserModel.dart';
 import 'package:umkm_store/utils/GlobalColor.dart';
+import 'package:umkm_store/widgets/button/PrimaryButton.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -17,71 +16,117 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-        create: (context) => HomeBloc()..add(LoadHomeData()),
+      create: (context) => HomeBloc()..add(LoadHomeData()),
+      child: BlocListener<LoginBloc, LoginState>(
+        listener: (context, state) {
+          if (state is LoginInitial) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text("Berhasil logout!"),
+                  backgroundColor: Colors.green),
+            );
+            Navigator.pushReplacementNamed(context, '/login');
+          } else if (state is LoginFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.error), backgroundColor: Colors.red),
+            );
+          }
+        },
         child: Scaffold(
           backgroundColor: const Color(0xFFF8F9FA),
-          body: SafeArea(child: BlocBuilder<HomeBloc, HomeState>(
-            builder: (context, state) {
-              if (state is HomeLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
+          body: SafeArea(
+            child: BlocBuilder<HomeBloc, HomeState>(
+              builder: (context, state) {
+                if (state is HomeLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-              if (state is HomeLoaded) {
-                return CustomScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  slivers: [
-                    _buildModernHeader(state.user),
-                    _buildUserProfileCard(state.user),
-                    _buildMenuSection(context),
-                    _buildLogout()
-                  ],
+                if (state is HomeLoaded) {
+                  return CustomScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    slivers: [
+                      _buildModernHeader(state.user),
+                      _buildUserProfileCard(state.user),
+                      _buildMenuSection(context),
+                      _buildLogout()
+                    ],
+                  );
+                }
+
+                // Tampilan jika Sesi Berakhir / Data tidak dimuat
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.lock_clock_rounded,
+                          size: 80, color: Colors.grey),
+                      const SizedBox(height: 16),
+                      const Text(
+                        "Sesi Anda telah berakhir",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const Text("Silahkan masuk kembali untuk melanjutkan"),
+                      const SizedBox(height: 24),
+                      BlocBuilder<LoginBloc, LoginState>(
+                        builder: (context, state) {
+                          return PrimaryButton(
+                            onPressed: () {
+                              context.read<LoginBloc>().add(LogoutRequested());
+                            },
+                            text: "LOGOUT & MASUK ULANG",
+                            isLoading: state is LoginLoading,
+                          );
+                        },
+                      )
+                    ],
+                  ),
                 );
-              }
-
-              return const Center(child: Text("Silahkan Login Kembali"));
-            },
-          )),
-        ));
+              },
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildLogout() {
     return SliverPadding(
-        padding: const EdgeInsets.fromLTRB(20, 30, 20, 10),
-        sliver: SliverToBoxAdapter(
-            child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            BlocConsumer<LoginBloc, LoginState>(builder: (context, state) {
-              return ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: GlobalColor.primaryColor,
+      padding: const EdgeInsets.fromLTRB(20, 30, 20, 30),
+      sliver: SliverToBoxAdapter(
+        child: BlocBuilder<LoginBloc, LoginState>(
+          builder: (context, state) {
+            return SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.red,
+                  side: const BorderSide(color: Colors.red),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 onPressed: state is LoginLoading
                     ? null
                     : () {
                         context.read<LoginBloc>().add(LogoutRequested());
                       },
-                child: const Text("Logout"),
-              );
-            }, listener: (context, state) {
-              if (state is LoginInitial) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text("Berhasil logout!"),
-                      backgroundColor: Colors.green),
-                );
-                Navigator.pushReplacementNamed(context, '/login');
-
-                log("berhasil logout");
-              } else if (state is LoginFailure) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                      content: Text(state.error), backgroundColor: Colors.red),
-                );
-              }
-            })
-          ],
-        )));
+                icon: state is LoginLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.red),
+                      )
+                    : const Icon(Icons.logout_rounded),
+                label: const Text("LOGOUT DARI APLIKASI"),
+              ),
+            );
+          },
+        ),
+      ),
+    );
   }
 
   Widget _buildModernHeader(UserData user) {
@@ -136,7 +181,6 @@ class HomePage extends StatelessWidget {
 
   // --- WIDGET HELPER: STATS CARD ---
   Widget _buildUserProfileCard(UserData user) {
-    print("user ${user.name}");
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       sliver: SliverToBoxAdapter(

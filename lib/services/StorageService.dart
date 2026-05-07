@@ -27,7 +27,7 @@ class StorageService {
 
   Future<void> saveUser(UserData user) async {
     final prefs = await SharedPreferences.getInstance();
-    String jsonStr = jsonEncode(user.toJson());
+    String jsonStr = json.encode(user.toJson());
     await prefs.setString(_userKey, jsonStr);
   }
 
@@ -36,7 +36,7 @@ class StorageService {
     final prefs = await SharedPreferences.getInstance();
     String? jsonStr = prefs.getString(_userKey);
     if (jsonStr != null) {
-      return UserData.fromJson(jsonDecode(jsonStr));
+      return UserData.fromKey(json.decode(jsonStr));
     }
     return null;
   }

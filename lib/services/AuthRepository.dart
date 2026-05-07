@@ -1,7 +1,6 @@
-import 'dart:developer';
-
 import 'package:dio/dio.dart';
 import 'package:umkm_store/constans/Constans.dart';
+import 'package:umkm_store/services/api_exception_handler.dart';
 
 class AuthRepository {
   final Dio _dio = Dio();
@@ -22,26 +21,18 @@ class AuthRepository {
 
       return response;
     } on DioException catch (e) {
-      String errorMessage = "Terjadi kesalahan yang tidak diketahui";
-
-      if (e.response != null) {
-        errorMessage =
-            e.response?.data['message'] ?? "Error ${e.response?.statusCode}";
-        log("Error API 401/422: $errorMessage");
-      } else {
-        errorMessage =
-            "Tidak dapat terhubung ke server. Periksa koneksi internet.";
-      }
-      throw errorMessage;
+      throw ApiExceptionHandler.handleException(e);
     }
   }
 
-  Future<Response> register() async {
+  Future<Response> register(
+    String email,
+  ) async {
     try {
       final response = await _dio.post(
         "${Constans.apiUrl}register",
         data: {
-          // 'email': identifier,
+          //  'email': identifier,
           // 'password': password,
         },
         options: Options(
@@ -53,17 +44,26 @@ class AuthRepository {
 
       return response;
     } on DioException catch (e) {
-      String errorMessage = "Terjadi kesalahan yang tidak diketahui";
+      throw ApiExceptionHandler.handleException(e);
+    }
+  }
 
-      if (e.response != null) {
-        errorMessage =
-            e.response?.data['message'] ?? "Error ${e.response?.statusCode}";
-        log("Error API 401/422: $errorMessage");
-      } else {
-        errorMessage =
-            "Tidak dapat terhubung ke server. Periksa koneksi internet.";
-      }
-      throw errorMessage;
+  Future<Response> checkLoginGoogleApp(
+      String uid, String email, String name) async {
+    try {
+      final response = await _dio.post(
+        "${Constans.apiUrl}auth/google/login-app",
+        data: {'email': email, 'google_id': uid, 'name': name},
+        options: Options(
+          headers: {
+            'Accept': 'application/json',
+          },
+        ),
+      );
+
+      return response;
+    } on DioException catch (e) {
+      throw ApiExceptionHandler.handleException(e);
     }
   }
 }

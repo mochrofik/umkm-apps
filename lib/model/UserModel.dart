@@ -31,21 +31,40 @@ class UserData {
     required this.updatedAt,
   });
 
-  factory UserData.fromJson(Map<String, dynamic> json) => UserData(
-        id: json["id"],
-        name: json["name"],
-        email: json["email"],
-        emailVerifiedAt: json["email_verified_at"] == null
-            ? null
-            : DateTime.parse(json["email_verified_at"]),
-        role: json["role"],
-        roles: json["roles"] == null
-            ? []
-            : List<String>.from(json["roles"]!.map((x) => x)),
-        status: json["status"],
-        createdAt: DateTime.parse(json["created_at"]),
-        updatedAt: DateTime.parse(json["updated_at"]),
-      );
+  factory UserData.fromJson(Map<String, dynamic> json) {
+    print("json model ${json['roles']}");
+    return UserData(
+      id: json["id"],
+      name: json["name"],
+      email: json["email"],
+      emailVerifiedAt: json["email_verified_at"] == null
+          ? null
+          : DateTime.parse(json["email_verified_at"]),
+      role: json["role"],
+      roles: json["roles"] == null
+          ? []
+          : List<String>.from(json["roles"]!.map((x) => x["name"])),
+      status: json["status"],
+      createdAt: DateTime.parse(json["created_at"]),
+      updatedAt: DateTime.parse(json["updated_at"]),
+    );
+  }
+
+  factory UserData.fromKey(Map<String, dynamic> json) {
+    return UserData(
+      id: json["id"],
+      name: json["name"],
+      email: json["email"],
+      emailVerifiedAt: json["email_verified_at"] == null
+          ? null
+          : DateTime.parse(json["email_verified_at"]),
+      role: json["role"],
+      roles: json["roles"] == null ? [] : List<String>.from(json["roles"]),
+      status: json["status"],
+      createdAt: DateTime.parse(json["created_at"]),
+      updatedAt: DateTime.parse(json["updated_at"]),
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         "id": id,
@@ -53,6 +72,7 @@ class UserData {
         "email": email,
         "email_verified_at": emailVerifiedAt?.toIso8601String(),
         "role": role,
+        "roles": roles,
         "status": status,
         "created_at": createdAt.toIso8601String(),
         "updated_at": updatedAt.toIso8601String(),

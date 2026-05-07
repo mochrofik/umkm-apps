@@ -1,14 +1,15 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:umkm_store/bloc/login/login_bloc.dart';
 import 'package:umkm_store/bloc/login/login_event.dart';
 import 'package:umkm_store/bloc/login/login_state.dart';
-import 'package:umkm_store/services/AuthRepository.dart';
+import 'package:umkm_store/services/AuthService.dart';
+import 'package:umkm_store/services/StorageService.dart';
 import 'package:umkm_store/utils/GlobalColor.dart';
 import 'package:umkm_store/widgets/button/PrimaryButton.dart';
 import 'package:umkm_store/widgets/button/GoogleButton.dart';
 import 'package:umkm_store/widgets/links/LinksCustom.dart';
+import 'package:umkm_store/widgets/input/InputCustom.dart';
 
 import '../register/register.dart';
 
@@ -37,188 +38,182 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) =>
-          LoginBloc(authRepository: context.read<AuthRepository>()),
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 30),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 60),
-                  // --- HEADER ---
-                  const Text(
-                    "Selamat Datang",
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: GlobalColor.textDark,
-                    ),
-                  ),
-                  const Text(
-                    "Silahkan masuk ke akun Anda",
-                    style: TextStyle(fontSize: 16, color: GlobalColor.greyHint),
-                  ),
-                  const SizedBox(height: 40),
+        create: (context) => LoginBloc(
+              authService: context.read<AuthService>(),
+              storageService: context.read<StorageService>(),
+            ),
+        child: BlocListener<LoginBloc, LoginState>(
+          listener: (context, state) {
+            if (state is LoginSuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content: Text("Login Berhasil!"),
+                    backgroundColor: Colors.green),
+              );
 
-                  // --- INPUT EMAIL ---
-                  const Text("Email",
-                      style: TextStyle(fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _emailController,
-                    decoration: InputDecoration(
-                      hintText: "Contoh: user@mail.com",
-                      prefixIcon: const Icon(Icons.person_outline,
-                          color: GlobalColor.primaryColor),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Colors.black12),
+              Navigator.pushReplacementNamed(context, '/home');
+            } else if (state is LoginFailure) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                    content: Text(state.error), backgroundColor: Colors.red),
+              );
+            } else if (state is LoginGoogleSuccess) {
+              if (state.googleLoginResponse.isNewUser) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => RegisterScreen(
+                              loginGoogle: state.googleLoginResponse,
+                            )));
+              } else {
+                Navigator.pushReplacementNamed(context, '/main-screen');
+              }
+            }
+          },
+          child: Scaffold(
+            backgroundColor: Colors.white,
+            body: SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 30),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 60),
+                      // --- HEADER ---
+                      const Text(
+                        "Selamat Datang",
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: GlobalColor.textDark,
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
+                      const Text(
+                        "Silahkan masuk ke akun Anda",
+                        style: TextStyle(
+                            fontSize: 16, color: GlobalColor.greyHint),
+                      ),
+                      const SizedBox(height: 40),
 
-                  // --- INPUT PASSWORD ---
-                  const Text("Kata Sandi",
-                      style: TextStyle(fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    obscureText: _isObscure,
-                    controller: _passwordController,
-                    decoration: InputDecoration(
-                      hintText: "Masukkan kata sandi",
-                      prefixIcon: const Icon(Icons.lock_outline,
-                          color: GlobalColor.primaryColor),
-                      suffixIcon: IconButton(
-                        icon: Icon(_isObscure
-                            ? Icons.visibility_off
-                            : Icons.visibility),
-                        onPressed: () =>
+                      // --- INPUT EMAIL ---
+                      InputCustom(
+                        label: "Email",
+                        hintText: "Contoh: user@mail.com",
+                        controller: _emailController,
+                        prefixIcon: Icons.person_outline,
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                      const SizedBox(height: 20),
+
+                      // --- INPUT PASSWORD ---
+                      InputCustom(
+                        label: "Kata Sandi",
+                        hintText: "Masukkan kata sandi",
+                        controller: _passwordController,
+                        prefixIcon: Icons.lock_outline,
+                        isPassword: true,
+                        isObscure: _isObscure,
+                        onTogglePassword: () =>
                             setState(() => _isObscure = !_isObscure),
                       ),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Colors.black12),
+
+                      // --- LUPA PASSWORD ---
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () {},
+                          child: const Text("Lupa Sandi?",
+                              style:
+                                  TextStyle(color: GlobalColor.primaryColor)),
+                        ),
                       ),
-                    ),
-                  ),
+                      const SizedBox(height: 20),
 
-                  // --- LUPA PASSWORD ---
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () {},
-                      child: const Text("Lupa Sandi?",
-                          style: TextStyle(color: GlobalColor.primaryColor)),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
+                      // --- TOMBOL LOGIN ---
+                      BlocBuilder<LoginBloc, LoginState>(
+                        builder: (context, state) {
+                          return SizedBox(
+                              width: double.infinity,
+                              height: 55,
+                              child: PrimaryButton(
+                                  onPressed: state is LoginLoading
+                                      ? null
+                                      : () {
+                                          context.read<LoginBloc>().add(
+                                                LoginSubmitted(
+                                                    _emailController.text,
+                                                    _passwordController.text),
+                                              );
+                                        },
+                                  text: "MASUK",
+                                  isLoading: state is LoginLoading));
+                        },
+                      ),
 
-                  // --- TOMBOL LOGIN ---
+                      const SizedBox(height: 30),
 
-                  BlocConsumer<LoginBloc, LoginState>(
-                    listener: (context, state) {
-                      if (state is LoginSuccess) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text("Login Berhasil!"),
-                              backgroundColor: Colors.green),
-                        );
-                        Navigator.pushReplacementNamed(context, '/home');
-                      } else if (state is LoginFailure) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text(state.error),
-                              backgroundColor: Colors.red),
-                        );
-                      }
-                    },
-                    builder: (context, state) {
-                      return SizedBox(
-                          width: double.infinity,
-                          height: 55,
-                          child: PrimaryButton(
-                              onPressed: state is LoginLoading
-                                  ? null
-                                  : () {
-                                      context.read<LoginBloc>().add(
-                                            LoginSubmitted(
-                                                _emailController.text,
-                                                _passwordController.text),
-                                          );
-                                    },
-                              text: "MASUK",
-                              isLoading: state is LoginLoading));
-                    },
-                  ),
+                      // --- DIVIDER ---
+                      Row(
+                        children: [
+                          Expanded(
+                              child: Divider(
+                                  color: GlobalColor.greyHint
+                                      .withValues(alpha: 0.5))),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                            child: Text("Atau",
+                                style: TextStyle(color: GlobalColor.greyHint)),
+                          ),
+                          Expanded(
+                              child: Divider(
+                                  color: GlobalColor.greyHint
+                                      .withValues(alpha: 0.5))),
+                        ],
+                      ),
 
-                  const SizedBox(height: 30),
+                      const SizedBox(height: 30),
 
-                  // --- DIVIDER ---
-                  Row(
-                    children: [
-                      Expanded(
-                          child: Divider(
-                              color: GlobalColor.greyHint.withOpacity(0.5))),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
-                        child: Text("Atau",
+                      // --- GOOGLE LOGIN ---
+                      BlocBuilder<LoginBloc, LoginState>(
+                        builder: (context, state) {
+                          return GoogleButton(
+                            onPressed: () {
+                              context
+                                  .read<LoginBloc>()
+                                  .add(GoogleLoginRequested());
+                            },
+                            isLoading: state is LoginGoogleLoading,
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 40),
+                      // // --- LINK DAFTAR ---
+                      const Center(
+                        child: Text("Belum punya akun?",
                             style: TextStyle(color: GlobalColor.greyHint)),
                       ),
-                      Expanded(
-                          child: Divider(
-                              color: GlobalColor.greyHint.withOpacity(0.5))),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _buildRegisterLink("Registrasi", () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => RegisterScreen()));
+                          }),
+                        ],
+                      ),
                     ],
                   ),
-
-                  const SizedBox(height: 30),
-
-                  // --- GOOGLE LOGIN ---
-                  BlocBuilder<LoginBloc, LoginState>(
-                    builder: (context, state) {
-                      return GoogleButton(
-                        onPressed: () {
-                          context.read<LoginBloc>().add(GoogleLoginRequested());
-                        },
-                        isLoading: state is LoginLoading,
-                      );
-                    },
-                  ),
-
-                  const SizedBox(height: 40),
-                  // // --- LINK DAFTAR ---
-                  const Center(
-                    child: Text("Belum punya akun?",
-                        style: TextStyle(color: GlobalColor.greyHint)),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildRegisterLink("Registrasi", () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => RegisterScreen()));
-                      }),
-                    ],
-                  ),
-                ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
-    );
+        ));
   }
 
   Widget _buildRegisterLink(String label, VoidCallback onTap) {

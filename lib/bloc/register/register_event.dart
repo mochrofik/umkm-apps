@@ -1,15 +1,11 @@
+import 'package:umkm_store/model/request/RegisterRequest.dart';
+
 abstract class RegisterEvent {}
 
 class RegisterSubmitted extends RegisterEvent {
-  final String name;
-  final String email;
-  final String phone;
-  final String password;
+  final RegisterRequest request;
 
   RegisterSubmitted({
-    required this.name,
-    required this.email,
-    required this.phone,
-    required this.password,
+    required this.request,
   });
 }

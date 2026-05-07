@@ -3,9 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:umkm_store/bloc/register/register_bloc.dart';
 import 'package:umkm_store/bloc/register/register_event.dart';
 import 'package:umkm_store/bloc/register/register_state.dart';
+import 'package:umkm_store/model/GoogleLoginResponses.dart';
+import 'package:umkm_store/model/request/RegisterRequest.dart';
+import 'package:umkm_store/utils/GlobalColor.dart';
+import 'package:umkm_store/widgets/input/InputCustom.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+  final GoogleLoginResponse? loginGoogle;
+  const RegisterScreen({super.key, this.loginGoogle});
 
   @override
   _RegisterScreenState createState() => _RegisterScreenState();
@@ -19,6 +24,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if (widget.loginGoogle != null) {
+      _nameController.text = widget.loginGoogle!.name!;
+      _emailController.text = widget.loginGoogle!.email!;
+    }
+  }
 
   @override
   void dispose() {
@@ -112,19 +127,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                         _buildSectionHeader("Data Pribadi"),
 
-                        _buildLabel("Nama Lengkap"),
-                        _buildTextField(
-                          _nameController,
-                          "Masukkan nama lengkap",
+                        InputCustom(
+                          label: "Nama Lengkap",
+                          hintText: "Masukkan nama lengkap",
+                          controller: _nameController,
+                          prefixIcon: Icons.person_outline,
                           validator: (v) =>
                               v!.isEmpty ? "Nama lengkap wajib diisi" : null,
                         ),
+                        const SizedBox(height: 20),
 
-                        _buildLabel("Email"),
-                        _buildTextField(
-                          _emailController,
-                          "Masukkan email",
+                        InputCustom(
+                          label: "Email",
+                          hintText: "Masukkan email",
+                          controller: _emailController,
+                          prefixIcon: Icons.email,
                           keyboardType: TextInputType.emailAddress,
+                          readOnly: widget.loginGoogle != null,
                           validator: (v) {
                             if (v!.isEmpty) return "Email wajib diisi";
                             if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
@@ -134,19 +153,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             return null;
                           },
                         ),
+                        const SizedBox(height: 20),
 
-                        _buildLabel("Nomor HP / WhatsApp"),
-                        _buildTextField(
-                          _phoneController,
-                          "Contoh: 08123456789",
+                        InputCustom(
+                          label: "Nomor HP / WhatsApp",
+                          hintText: "Contoh: 08123456789",
+                          controller: _phoneController,
+                          prefixIcon: Icons.phone_android_outlined,
                           keyboardType: TextInputType.phone,
                         ),
+                        const SizedBox(height: 20),
 
-                        _buildLabel("Password (Min. 8 Karakter)"),
-                        _buildTextField(
-                          _passwordController,
-                          "Masukkan password",
-                          obscure: true,
+                        InputCustom(
+                          label: "Password (Min. 8 Karakter)",
+                          hintText: "Masukkan password",
+                          controller: _passwordController,
+                          prefixIcon: Icons.lock_outline,
+                          isPassword: true,
+                          isObscure: true, // simplified for now
                           validator: (v) {
                             if (v!.isEmpty) return "Password wajib diisi";
                             if (v.length < 8) {
@@ -163,7 +187,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           height: 56,
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue[600],
+                              backgroundColor: GlobalColor.primaryColor,
                               foregroundColor: Colors.white,
                               elevation: 0,
                               shape: RoundedRectangleBorder(
@@ -200,7 +224,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 child: Text(
                                   "Masuk Sekarang",
                                   style: TextStyle(
-                                    color: Colors.blue[600],
+                                    color: GlobalColor.primaryColor,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -224,11 +248,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (_formKey.currentState!.validate()) {
       context.read<RegisterBloc>().add(
             RegisterSubmitted(
+                request: RegisterRequest(
+              role: widget.loginGoogle != null
+                  ? widget.loginGoogle!.isNewUser
+                      ? 'customer'
+                      : 'customer'
+                  : 'customer',
+              status: widget.loginGoogle != null
+                  ? widget.loginGoogle!.isNewUser
+                      ? 'active'
+                      : 'active'
+                  : 'verify',
               name: _nameController.text,
               email: _emailController.text,
               phone: _phoneController.text,
               password: _passwordController.text,
-            ),
+              googleId: widget.loginGoogle != null
+                  ? widget.loginGoogle!.googleId
+                  : "",
+            )),
           );
     }
   }
@@ -242,68 +280,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.normal,
-            color: Colors.blue[600],
+            color: GlobalColor.primaryColor,
           ),
         ),
         SizedBox(height: 4),
         Divider(color: Colors.grey[200], thickness: 1),
         SizedBox(height: 16),
       ],
-    );
-  }
-
-  Widget _buildLabel(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          color: Colors.grey[700],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField(
-    TextEditingController controller,
-    String hint, {
-    bool obscure = false,
-    TextInputType? keyboardType,
-    String? Function(String?)? validator,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: TextFormField(
-        controller: controller,
-        obscureText: obscure,
-        keyboardType: keyboardType,
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-          filled: true,
-          fillColor: Colors.white,
-          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey[200]!),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey[200]!),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.blue[500]!, width: 2),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.red[300]!),
-          ),
-        ),
-        validator: validator,
-      ),
     );
   }
 }
