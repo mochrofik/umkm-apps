@@ -12,6 +12,6 @@ class FetchNearbyStores extends CustomerEvent {
 }
 
 class SelectStore extends CustomerEvent {
-  final StoreNearby store;
+  final StoreNearby? store;
   SelectStore(this.store);
 }

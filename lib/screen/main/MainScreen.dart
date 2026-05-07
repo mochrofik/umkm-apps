@@ -1,13 +1,18 @@
+import 'package:custom_refresh_indicator/custom_refresh_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:logger/logger.dart';
+import 'package:umkm_store/bloc/category/category_bloc.dart';
+import 'package:umkm_store/bloc/category/category_event.dart';
+import 'package:umkm_store/bloc/category/category_state.dart';
 import 'package:umkm_store/bloc/current_location/current_location_bloc.dart';
 import 'package:umkm_store/bloc/current_location/current_location_event.dart';
 import 'package:umkm_store/bloc/current_location/current_location_state.dart';
 import 'package:umkm_store/bloc/customer/customer_bloc.dart';
 import 'package:umkm_store/bloc/customer/customer_event.dart';
 import 'package:umkm_store/bloc/customer/customer_state.dart';
+import 'package:umkm_store/repository/CategoryRepository.dart';
 import 'package:umkm_store/screen/profile/ProfileScreen.dart';
 import 'package:umkm_store/screen/promo/PromoScreen.dart';
 import 'package:umkm_store/services/CurrentLocationService.dart';
@@ -50,6 +55,11 @@ class _MainScreenState extends State<MainScreen> {
           BlocProvider(
             create: (context) => CustomerBloc(context.read<CustomerService>()),
           ),
+          BlocProvider(
+            create: (context) => CategoryBloc(
+              categoryRepository: context.read<CategoryRepository>(),
+            )..add(FetchCategoryUser()),
+          )
         ],
         child: MultiBlocListener(
           listeners: [
@@ -146,16 +156,41 @@ class HomeBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: EdgeInsets.zero,
-      children: [
-        const SearchAppBar(),
-        SizedBox(
-          height: 20,
-        ),
-        const CategoryGridView(),
-        const NearbyStoresList(),
-      ],
+    return CustomMaterialIndicator(
+      onRefresh: () async {
+        final categoryBloc = context.read<CategoryBloc>();
+        categoryBloc.add(FetchCategoryUser());
+
+        final currentLocationBloc = context.read<CurrentLocationBloc>();
+        currentLocationBloc.add(FetchCurrentLocation());
+
+        final locationState = currentLocationBloc.state;
+        final customerBloc = context.read<CustomerBloc>();
+
+        if (locationState is CurrentLocationSuccess) {
+          customerBloc.add(FetchNearbyStores(
+              latitude: locationState.position.latitude,
+              longitude: locationState.position.longitude));
+        }
+
+        await Future.wait([
+          categoryBloc.stream
+              .firstWhere((s) => s is CategoryLoaded || s is CategoryError),
+          customerBloc.stream.firstWhere(
+              (s) => s is CustomerNearbyStoresSuccess || s is CustomerFailure),
+        ]);
+      },
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          const SearchAppBar(),
+          SizedBox(
+            height: 20,
+          ),
+          const CategoryGridView(),
+          const NearbyStoresList(),
+        ],
+      ),
     );
   }
 }

@@ -22,7 +22,7 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
 
     on<SelectStore>((event, emit) {
       final currentState = state;
-      emit(NavigateToStoreDetail(event.store));
+      emit(NavigateToStoreDetail(event.store!));
 
       // Restore previous success state to keep the list visible
       if (currentState is CustomerNearbyStoresSuccess) {
